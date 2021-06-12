@@ -1,0 +1,51 @@
+#! /usr/bin/fish
+source config
+set WINEPREFIXES ./wineprefixes.conf
+set DESK_FILE_TEMPL desktop_tmpl.desktop
+set RET "1"
+
+if not test -d $DESK_FILE_PATH
+    mkdir -p $DESK_FILE_PATH
+end
+if not test -d $ICONS_PATH
+    mkdir -p $ICONS_PATH
+end
+
+function posix_escape -a filepath
+    set filepath (string escape --style=regex $filepath)
+    set filepath (string replace --all '/' '\/' $filepath)
+    set RET $filepath
+    return 0
+end
+cat $WINEPREFIXES | while read -l a;
+    if not string match -q "#*" -- $a 
+        set S (string split '|'  $a)
+        set PREFIX $S[1]
+        set APPNAME $S[2]
+        set APPEXEC $S[3]
+
+        set BINNAME (basename "$S[3]")
+        echo "extracting icons from $APPEXEC"
+        wrestool -x --output=$ICONS_PATH -t14 $APPEXEC
+        set ICON_PATH $ICONS_PATH/(ls $ICONS_PATH | grep -i $BINNAME | head -n 1)
+        echo $ICON_PATH
+        set APP_DESK_FILE_PATH $DESK_FILE_PATH/$APPNAME.desktop 
+        cp $DESK_FILE_TEMPL $APP_DESK_FILE_PATH
+
+        sed -i "s/%NAME%/$APPNAME/g" $APP_DESK_FILE_PATH
+        posix_escape $ICON_PATH
+        sed -i "s/%ICON%/$RET/g" $APP_DESK_FILE_PATH
+        set BINNAMEL (string lower $BINNAME)
+        sed -i "s/%WMCLASS%/$BINNAMEL/g" $APP_DESK_FILE_PATH
+
+        set -l SELF_DIR (realpath (dirname (status -f)))
+        set CMD (echo "env WINEPREFIX=$PREFIX $SELF_DIR/winerunapp $WINEBIN '$APPEXEC' %F ")
+        posix_escape $CMD
+        sed -i "s/%EXEC%/$RET/g" $APP_DESK_FILE_PATH
+
+        set APPPATH (dirname $APPEXEC)
+        posix_escape $APPPATH
+        sed -i "s/%PATH%/$RET/g" $APP_DESK_FILE_PATH
+    end
+end
+update-desktop-database $DESK_FILE_PATH

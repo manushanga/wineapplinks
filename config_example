@@ -1,0 +1,5 @@
+set WINEPREFIXES <prefixes-conf-path>
+set WINEBIN <wine-binary-path>
+set DESK_FILE_PATH <desktop-file-directory> 
+set ICONS_PATH <temporary-directory-for-icons>
+

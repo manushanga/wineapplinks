@@ -1,0 +1,9 @@
+#! /usr/bin/fish
+
+set WINEBIN $argv[1]
+set WINEFILEARGS $argv[2]
+for f in $argv[3..-1]
+    set -a WINEFILEARGS (echo "z:$f") 
+end
+
+$WINEBIN $WINEFILEARGS
