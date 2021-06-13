@@ -1,0 +1,18 @@
+#! /usr/bin/fish
+source config
+echo "select prefix:"
+set INDEX 1
+cat $WINEPREFIXES | cut -d'|' -f1 | uniq | while read -l a;
+    if not string match -q "#*" -- $a 
+        set PREFIX $a
+        
+        echo "$INDEX $PREFIX"
+        set INDEX (math $INDEX + 1)
+        set -a PREFIXES $PREFIX
+    end
+end
+read -l INP_INDEX
+set PREFIX $PREFIXES[$INP_INDEX]
+echo $PREFIX
+echo $argv[1..-1]
+env WINEPREFIX=$PREFIX $WINEBIN $argv[1..-1]

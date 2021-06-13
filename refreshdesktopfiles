@@ -1,6 +1,5 @@
 #! /usr/bin/fish
 source config
-set WINEPREFIXES ./wineprefixes.conf
 set DESK_FILE_TEMPL desktop_tmpl.desktop
 set RET "1"
 
@@ -17,6 +16,16 @@ function posix_escape -a filepath
     set RET $filepath
     return 0
 end
+function setup_winerunonprefix
+    cp runonprefix.desktop $DESK_FILE_PATH
+    set -l SELF_DIR (realpath (dirname (status -f)))
+    set CMD $SELF_DIR/winerunonprefix
+    posix_escape $CMD
+    sed -i "s/%EXEC%/$RET/g" $DESK_FILE_PATH/runonprefix.desktop
+    posix_escape $SELF_DIR
+    sed -i "s/%PATH%/$RET/g" $DESK_FILE_PATH/runonprefix.desktop
+    return 0
+end 
 cat $WINEPREFIXES | while read -l a;
     if not string match -q "#*" -- $a 
         set S (string split '|'  $a)
@@ -48,4 +57,5 @@ cat $WINEPREFIXES | while read -l a;
         sed -i "s/%PATH%/$RET/g" $APP_DESK_FILE_PATH
     end
 end
+setup_winerunonprefix
 update-desktop-database $DESK_FILE_PATH

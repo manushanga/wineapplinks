@@ -1,0 +1,9 @@
+[Desktop Entry]
+Exec=%EXEC% %F
+Icon=utilities-terminal
+Type=Application
+StartupNotify=true
+GenericName=Run On Prefix
+Name=Run On Prefix
+Terminal=True
+Path=%PATH%
